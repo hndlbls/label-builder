@@ -2,18 +2,18 @@
 
 window.addEventListener('load', () => {
   // 1) Inizializza Fabric.js canvas
-  const canvas = new fabric.Canvas('labelCanvas', { selection: false });
+  const canvas    = new fabric.Canvas('labelCanvas', { selection: false });
   const container = document.querySelector('.canvas-container');
 
-  // 2) Funzione per ridimensionare il canvas in base alla larghezza del container e rapporto 207:52
+  // 2) Funzione per ridimensionare il canvas (rapporto 207:52)
   function resizeCanvas() {
     const w = container.clientWidth;
-    const h = w * 52 / 207;  // rapporto 207:52
+    const h = w * 52 / 207;
     canvas.setWidth(w);
     canvas.setHeight(h);
   }
 
-  // 3) Funzione per caricare il layout di base come sfondo Fabric.js
+  // 3) Funzione per caricare il layout come sfondo
   function loadLayout(filename) {
     canvas.setBackgroundImage(null, canvas.renderAll.bind(canvas));
     fabric.Image.fromURL(`img/${filename}`, img => {
@@ -33,7 +33,7 @@ window.addEventListener('load', () => {
     });
   });
 
-  // 5) Font & Text: popola select e gestisci drag & drop testo
+  // 5) Popola select dei font e gestisci testo draggable
   const fontSelect = document.getElementById('fontSelect');
   const textInput  = document.getElementById('textInput');
   const fonts      = [
@@ -80,20 +80,27 @@ window.addEventListener('load', () => {
     });
   });
 
-  // 7) Inizializza canvas: ridimensiona e carica layout di default
+  // 7) ResizeObserver per gestire dinamicamente ridimensionamenti e mobile quirks
+  const ro = new ResizeObserver(() => {
+    resizeCanvas();
+    const curr = document.querySelector('input[name="holeOption"]:checked');
+    if (curr) loadLayout(`${curr.value}.png`);
+  });
+  ro.observe(container);
+
+  // 8) Gestisci orientationchange su mobile
+  window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+      resizeCanvas();
+      const curr = document.querySelector('input[name="holeOption"]:checked');
+      if (curr) loadLayout(`${curr.value}.png`);
+    }, 200);
+  });
+
+  // 9) Inizializza canvas: ridimensiona e carica layout di default
   resizeCanvas();
   const initial = document.querySelector('input[name="holeOption"]:checked');
   if (initial) {
     loadLayout(`${initial.value}.png`);
   }
-
-  // 8) Usa ResizeObserver per ridimensionare dinamicamente su mobile/desktop
-  const ro = new ResizeObserver(() => {
-    resizeCanvas();
-    const curr = document.querySelector('input[name="holeOption"]:checked');
-    if (curr) {
-      loadLayout(`${curr.value}.png`);
-    }
-  });
-  ro.observe(container);
 });

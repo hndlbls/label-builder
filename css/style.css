@@ -3,11 +3,13 @@ body {
   margin: 0;
   padding: 0;
 }
+
 .builder-header {
   background: #f4f4f4;
   padding: 20px;
   text-align: center;
 }
+
 .controls {
   display: flex;
   flex-wrap: wrap;
@@ -15,42 +17,29 @@ body {
   padding: 20px;
   background: #fff;
 }
+
 .controls label {
   flex: 1 1 100%;
   margin-top: 8px;
 }
+
 .controls select,
 .controls input {
   flex: 1 1 200px;
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
-}
-
-.canvas-container {
-  width: 100%;           /* prendi tutta la larghezza disponibile */
-  max-width: 100%;       /* non limitarti a 600px come prima */
-  padding: 20px;
-  background: #f9f9f9;
   box-sizing: border-box;
 }
-.canvas-container canvas {
-  display: block;        /* elimina spazi vuoti sotto il canvas */
-  width: 100%;           /* scala orizzontalmente */
-  height: auto;          /* scala verticalmente mantenendo il rapporto */
-}
 
-
-
-
-
-
+/* ===== Hole Options ===== */
 .hole-options {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 16px;
 }
+
 .hole-option {
   display: flex;
   flex-direction: column;
@@ -58,21 +47,59 @@ body {
   cursor: pointer;
   font-size: 0.9rem;
 }
+
 .hole-option input {
   display: none;
 }
+
 .hole-option img {
   width: 80px;
   height: auto;
   border: 2px solid transparent;
   border-radius: 4px;
-  transition: border-color 0.2s;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
+
 .hole-option span {
   margin-top: 4px;
 }
+
 /* evidenzia l’opzione selezionata */
-.hole-option input:checked + img {
+.hole-option input:checked + img,
+.hole-option input:checked ~ img {
   border-color: #AA829F;
+  box-shadow: 0 0 0 4px rgba(170,130,159,0.2);
 }
 
+/* ===== Canvas Preview ===== */
+.canvas-container {
+  width: 100%;
+  max-width: 100%;
+  padding: 20px;
+  background: #f9f9f9;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+}
+
+.canvas-container canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ===== Controls for text/icon ===== */
+#fontSelect, #iconSelect {
+  margin-bottom: 0;
+}
+
+/* Media Queries (esempio) */
+@media screen and (max-width: 480px) {
+  .hole-options {
+    gap: 8px;
+  }
+  .hole-option img {
+    width: 60px;
+  }
+}
