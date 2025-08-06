@@ -117,3 +117,45 @@ body {
     flex: 1 1 100%;        /* full-width fields on small screens */
   }
 }
+
+.warning {
+  max-width: 1000px;
+  margin: 10px auto;
+  padding: 12px;
+  background: #ffdddd;
+  border: 1px solid #ff5c5c;
+  color: #800;
+  font-size: 0.9rem;
+  text-align: center;
+  border-radius: 4px;
+}
+
+/* area riservata al warning per evitare layout shift */
+.validation-area {
+  min-height: 44px;               /* riserva spazio fisso */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.warning {
+  background: #ffdddd;
+  border: 1px solid #ff5c5c;
+  color: #800;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  /* niente reflow: usiamo visibility/opacity */
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity .15s ease;
+}
+
+.warning.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* opzionale: evita overflow orizzontale */
+html, body { overflow-x: hidden; }
