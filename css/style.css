@@ -1,35 +1,52 @@
-body {
-  font-family: sans-serif;
+/* ========= RESET E BASE PER NO OVERFLOW ========= */
+html, body {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+  max-width: 100vw;
+  overflow-x: hidden;        /* blocca lo scroll orizzontale dell’intera pagina */
+}
+*, *::before, *::after {
+  box-sizing: inherit;
 }
 
+/* ========= STILI GLOBALI ========= */
+body {
+  font-family: sans-serif;
+  background: #ffffff;
+}
+
+/* ========= HEADER ========= */
 .builder-header {
   background: #f4f4f4;
   padding: 20px;
   text-align: center;
 }
 
+/* ========= CONTROLS ========= */
 .controls {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   padding: 20px;
   background: #fff;
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
 }
-
+.controls > * {
+  min-width: 0;             /* permette ai figli di restringersi evitando overflow */
+}
 .controls label {
   flex: 1 1 100%;
   margin-top: 8px;
 }
-
 .controls select,
 .controls input {
   flex: 1 1 200px;
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  box-sizing: border-box;
 }
 
 /* ===== Hole Options ===== */
@@ -38,8 +55,8 @@ body {
   flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 16px;
+  width: 100%;
 }
-
 .hole-option {
   display: flex;
   flex-direction: column;
@@ -47,11 +64,9 @@ body {
   cursor: pointer;
   font-size: 0.9rem;
 }
-
 .hole-option input {
   display: none;
 }
-
 .hole-option img {
   width: 80px;
   height: auto;
@@ -60,46 +75,45 @@ body {
   box-sizing: border-box;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-
 .hole-option span {
   margin-top: 4px;
 }
-
-/* evidenzia l’opzione selezionata */
 .hole-option input:checked + img,
 .hole-option input:checked ~ img {
   border-color: #AA829F;
   box-shadow: 0 0 0 4px rgba(170,130,159,0.2);
 }
 
-/* ===== Canvas Preview ===== */
+/* ========= CANVAS PREVIEW ========= */
 .canvas-container {
   width: 100%;
-  max-width: 100%;
   padding: 20px;
   background: #f9f9f9;
   box-sizing: border-box;
   display: flex;
   justify-content: center;
 }
-
 .canvas-container canvas {
   display: block;
   width: 100%;
   height: auto;
 }
 
-/* ===== Controls for text/icon ===== */
+/* ========= DRAG & DROP CONTROLS ========= */
 #fontSelect, #iconSelect {
   margin-bottom: 0;
 }
 
-/* Media Queries (esempio) */
+/* ========= MEDIA QUERY PER MOBILE ========= */
 @media screen and (max-width: 480px) {
   .hole-options {
     gap: 8px;
   }
   .hole-option img {
     width: 60px;
+  }
+  .controls select,
+  .controls input {
+    flex: 1 1 100%;        /* full-width fields on small screens */
   }
 }
