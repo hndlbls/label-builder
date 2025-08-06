@@ -13,11 +13,29 @@
   </div>
 
   <div class="controls">
-    <label>1. Choose drilling layout:</label>
-    <select id="layoutSelect">
-      <option value="layout1.png">Layout A</option>
-      <option value="layout2.png">Layout B</option>
-    </select>
+    <label>1. Hole Options:</label>
+<div class="hole-options">
+  <label class="hole-option">
+    <input type="radio" name="holeOption" value="H0" checked>
+    <img src="img/H0-prew.png" alt="Layout A">
+    <span>No Holes</span>
+  </label>
+  <label class="hole-option">
+    <input type="radio" name="holeOption" value="H1">
+    <img src="img/H1-prew.png" alt="Layout B">
+    <span>Sew Holes</span>
+  </label>
+  <label class="hole-option">
+    <input type="radio" name="holeOption" value="H2">
+    <img src="img/H2-prew.png" alt="Layout C">
+    <span>Snap Rivets</span>
+  </label>
+  <label class="hole-option">
+    <input type="radio" name="holeOption" value="H3">
+    <img src="img/H3-prew.png" alt="Layout D">
+    <span>Screw Rivets</span>
+  </label>
+</div>
 
     <label>2. Add text & font:</label>
     <select id="fontSelect"></select>
@@ -34,9 +52,12 @@
     <input type="text" id="orderNum" placeholder="Order #">
   </div>
 
-  <div class="canvas-container">
-    <canvas id="labelCanvas" width="600" height="300"></canvas>
-  </div>
+
+<div class="canvas-container">
+  <canvas id="labelCanvas" width="207" height="52"></canvas>
+</div>
+
+
 
   <script src="js/app.js"></script>
 </body>

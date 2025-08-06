@@ -26,9 +26,53 @@ body {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+
 .canvas-container {
-  display: flex;
-  justify-content: center;
+  width: 100%;           /* prendi tutta la larghezza disponibile */
+  max-width: 100%;       /* non limitarti a 600px come prima */
   padding: 20px;
   background: #f9f9f9;
+  box-sizing: border-box;
 }
+.canvas-container canvas {
+  display: block;        /* elimina spazi vuoti sotto il canvas */
+  width: 100%;           /* scala orizzontalmente */
+  height: auto;          /* scala verticalmente mantenendo il rapporto */
+}
+
+
+
+
+
+
+.hole-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.hole-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.hole-option input {
+  display: none;
+}
+.hole-option img {
+  width: 80px;
+  height: auto;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  transition: border-color 0.2s;
+}
+.hole-option span {
+  margin-top: 4px;
+}
+/* evidenzia l’opzione selezionata */
+.hole-option input:checked + img {
+  border-color: #AA829F;
+}
+
