@@ -1,29 +1,26 @@
 // js/app.js
-window.addEventListener('load', () => {
-  // ===== Correzioni manuali =====
-  // offset in px CANVAS (positivo = sposta overlay/validazione a destra/in basso)
-  const OFFSET_CANVAS_X = 7;     // ← REGOLA qui (es. 8)
-  const OFFSET_CANVAS_Y = 0;
+window.addEventListener('load', async () => {
+  // ===== 1) Attendi i webfont (se supportato) =====
+  if (document.fonts && document.fonts.ready) {
+    try { await document.fonts.ready; } catch(_) {}
+  }
 
-  // tweak di scala (fattore relativo) — positivo = allarga
-  const SCALE_EPS_X = 0.03;      // ← REGOLA qui (es. 0.02 = +2%)
-  const SCALE_EPS_Y = 0.00;
-
-  // ===== Fabric setup
+  // ===== 2) Canvas Fabric senza retina scaling (coerenza su tutti i device) =====
   fabric.Object.prototype.objectCaching = false;
+  const canvas = new fabric.Canvas('labelCanvas', {
+    selection: false,
+    enableRetinaScaling: false   // <— chiave per eliminare differenze tra dispositivi
+  });
 
-  const canvas    = new fabric.Canvas('labelCanvas', { selection: false });
   const container = document.querySelector('.canvas-container');
   const warningEl = document.getElementById('warning');
 
   function showWarning(show) {
     if (!warningEl) return;
-    warningEl.style.display    = show ? 'block' : 'none';
-    warningEl.style.visibility = show ? 'visible' : 'hidden';
-    warningEl.style.opacity    = show ? '1' : '0';
+    warningEl.classList.toggle('show', !!show);
   }
 
-  // ===== Maschera off-screen
+  // ===== Maschera off-screen (per validazione) =====
   let maskCanvas, maskCtx, maskReady = false, maskW = 0, maskH = 0;
   function loadMask(srcMask) {
     maskReady = false;
@@ -45,7 +42,7 @@ window.addEventListener('load', () => {
     img.onerror = () => console.error('[Mask] failed', img.src);
   }
 
-  // ===== Overlay maschera (persistente)
+  // ===== Overlay grafico della maschera (solo visibility) =====
   let maskOverlay = null;
   function loadMaskOverlay(srcMask) {
     fabric.Image.fromURL(`img/${srcMask}`, img => {
@@ -65,7 +62,7 @@ window.addEventListener('load', () => {
     imgObj.setCoords();
   }
 
-  // ===== Canvas responsive (207:52)
+  // ===== Canvas responsive (rapporto 207:52) =====
   function resizeCanvas() {
     const w = container.clientWidth;
     const h = w * 52 / 207;
@@ -83,7 +80,7 @@ window.addEventListener('load', () => {
     canvas.requestRenderAll();
   }
 
-  // ===== Sfondo layout
+  // ===== Sfondo layout =====
   function loadLayout(filename) {
     canvas.setBackgroundImage(null, canvas.renderAll.bind(canvas));
     fabric.Image.fromURL(`img/${filename}`, img => {
@@ -94,7 +91,7 @@ window.addEventListener('load', () => {
     });
   }
 
-  // ===== Hit-canvas (render per-pixel)
+  // ===== Hit-canvas (render per-pixel dell'oggetto alla risoluzione maschera) =====
   let hitCanvas, hitCtx;
   function ensureHitCanvas(w, h) {
     if (!hitCanvas) {
@@ -107,7 +104,7 @@ window.addEventListener('load', () => {
     }
   }
 
-  // ===== Overlay di debug (pixel occupati)
+  // ===== Overlay di debug (pixel occupati) =====
   let occCanvas, occCtx, debugOverlay = null;
   const OCC_FILL_RGBA = 'rgba(0,160,255,0.47)';
   function ensureOccCanvas(w, h) {
@@ -131,40 +128,30 @@ window.addEventListener('load', () => {
     }
   }
 
-  // ===== Parametri validazione
-  const WHITE_LUMA_THRESHOLD = 200; // bianco=OK (inverti se maschera invertita)
+  // ===== Parametri validazione =====
+  const WHITE_LUMA_THRESHOLD = 200; // bianco=OK (invertire se maschera invertita)
   const SAMPLE_STEP          = 1;
   let isDragging = false;
 
-  // ===== Validazione per-pixel + overlay debug (con offset + scala corretti)
+  // ===== Validazione per-pixel + overlay debug =====
   function isObjectInAllowedZone(obj) {
     if (!maskReady) return true;
 
-    const cW = canvas.getWidth(),  cH = canvas.getHeight();
+    // Mappa coordinate canvas → maschera (nessun retina, niente offset manuali)
+    const sx = maskW / canvas.getWidth();
+    const sy = maskH / canvas.getHeight();
 
-    // scala base (canvas -> maschera)
-    const baseSX = maskW / cW;
-    const baseSY = maskH / cH;
-
-    // applica il tweak di scala
-    const sx = baseSX * (1 + SCALE_EPS_X);
-    const sy = baseSY * (1 + SCALE_EPS_Y);
-
-    // offset convertito in px maschera
-    const ox = OFFSET_CANVAS_X * baseSX;
-    const oy = OFFSET_CANVAS_Y * baseSY;
-
-    // 1) Render oggetto su hitCanvas (scalato con tweak)
+    // 1) Render solo dell'oggetto su hitCanvas (stessa posa, stessa metrica)
     hitCtx.clearRect(0, 0, maskW, maskH);
     hitCtx.save();
-    hitCtx.scale(sx, sy);
-    obj.render(hitCtx);
+    hitCtx.scale(sx, sy);        // scala uniforme dalla dimensione canvas a quella maschera
+    obj.render(hitCtx);          // usa l'oggetto reale (font già pronto)
     hitCtx.restore();
 
-    // 2) DEBUG overlay: intero hitCanvas, con offset, nessun ritaglio
+    // 2) Overlay di debug: copia intero hitCanvas e tingilo (nessun ritaglio = niente shift)
     if (isDragging) {
       occCtx.clearRect(0, 0, maskW, maskH);
-      occCtx.drawImage(hitCanvas, ox, oy); // <-- offset applicato
+      occCtx.drawImage(hitCanvas, 0, 0);
       occCtx.globalCompositeOperation = 'source-in';
       occCtx.fillStyle = OCC_FILL_RGBA;
       occCtx.fillRect(0, 0, maskW, maskH);
@@ -174,54 +161,49 @@ window.addEventListener('load', () => {
       scaleOverlay(debugOverlay);
     }
 
-    // 3) Bounding rect mappata con la stessa scala/offset
+    // 3) Confronto per-pixel limitato alla bbox in coordinate MASCHERA
     const rect = obj.getBoundingRect(true, true);
-    const rx0 = Math.max(0, Math.floor(rect.left   * sx)); // coordinate su hit (senza offset)
-    const ry0 = Math.max(0, Math.floor(rect.top    * sy));
-    const rw  = Math.min(maskW - rx0, Math.ceil(rect.width  * sx));
-    const rh  = Math.min(maskH - ry0, Math.ceil(rect.height * sy));
+    const rx = Math.max(0, Math.floor(rect.left   * sx));
+    const ry = Math.max(0, Math.floor(rect.top    * sy));
+    const rw = Math.min(maskW - rx, Math.ceil(rect.width  * sx));
+    const rh = Math.min(maskH - ry, Math.ceil(rect.height * sy));
     if (rw <= 0 || rh <= 0) return true;
 
-    const rxMask = Math.max(0, Math.floor(rect.left * sx + ox)); // maschera con offset
-    const ryMask = Math.max(0, Math.floor(rect.top  * sy + oy));
+    const objData  = hitCtx.getImageData(rx, ry, rw, rh).data;
+    const maskData = maskCtx.getImageData(rx, ry, rw, rh).data;
 
-    const objData  = hitCtx.getImageData(rx0,   ry0,   rw, rh).data;   // oggetto (tweak no offset)
-    const maskData = maskCtx.getImageData(rxMask, ryMask, rw, rh).data; // maschera (offset)
-
-    // 4) Confronto per-pixel
-    let valid = true;
     for (let y = 0; y < rh; y += SAMPLE_STEP) {
       let row = y * rw * 4;
       for (let x = 0; x < rw; x += SAMPLE_STEP) {
         const idx = row + x * 4;
-
-        const oa = objData[idx + 3];
-        if (oa <= 10) continue;
-
+        const oa = objData[idx + 3];        // alpha oggetto
+        if (oa <= 10) continue;             // ignora pixel trasparenti
         const r = maskData[idx], g = maskData[idx+1], b = maskData[idx+2], a = maskData[idx+3];
         const luma = 0.2126*r + 0.7152*g + 0.0722*b;
-        const allowedHere = (a >= 128) && (luma >= WHITE_LUMA_THRESHOLD);
-        if (!allowedHere) { valid = false; break; }
+        const allowed = (a >= 128) && (luma >= WHITE_LUMA_THRESHOLD);
+        if (!allowed) return false;
       }
-      if (!valid) break;
     }
-    return valid;
+    return true;
   }
 
   function updateValidity(obj) {
-    const ok = isObjectInAllowedZone(obj);
-    obj.set({ stroke: ok ? null : 'red', strokeWidth: ok ? 0 : 2 });
-    canvas.requestRenderAll();
-    showWarning(!ok);
+    // throttling su frame per evitare lavoro eccessivo durante drag
+    if (updateValidity._raf) cancelAnimationFrame(updateValidity._raf);
+    updateValidity._raf = requestAnimationFrame(() => {
+      const ok = isObjectInAllowedZone(obj);
+      obj.set({ stroke: ok ? null : 'red', strokeWidth: ok ? 0 : 2 });
+      canvas.requestRenderAll();
+      showWarning(!ok);
+    });
   }
 
-  // ===== Eventi oggetto
+  // ===== Eventi oggetto =====
   canvas.on('object:moving',   e => updateValidity(e.target));
   canvas.on('object:scaling',  e => updateValidity(e.target));
   canvas.on('object:rotating', e => updateValidity(e.target));
   canvas.on('object:added',    e => updateValidity(e.target));
 
-  // ===== Drag: mostra/nascondi overlay
   canvas.on('mouse:down', () => {
     isDragging = true;
     if (maskOverlay)  { maskOverlay.set('visible', true);  maskOverlay.moveTo(0); }
@@ -235,7 +217,7 @@ window.addEventListener('load', () => {
     canvas.requestRenderAll();
   });
 
-  // ===== Hole options
+  // ===== Hole options =====
   document.querySelectorAll('input[name="holeOption"]').forEach(radio => {
     radio.addEventListener('change', () => {
       if (radio.checked) {
@@ -247,7 +229,7 @@ window.addEventListener('load', () => {
     });
   });
 
-  // ===== Testo & font
+  // ===== Testo & font =====
   const fontSelect = document.getElementById('fontSelect');
   const textInput  = document.getElementById('textInput');
   [
@@ -265,7 +247,8 @@ window.addEventListener('load', () => {
       fontFamily: fontSelect.value,
       left: 20, top: 10,
       fill: '#333',
-      fontSize: 40
+      fontSize: 40,
+      objectCaching: false
     });
     canvas.add(txt).setActiveObject(txt);
   }
@@ -278,16 +261,17 @@ window.addEventListener('load', () => {
     }
   });
 
-  // ===== Icone
+  // ===== Icone =====
   document.getElementById('iconSelect').addEventListener('change', e => {
     fabric.Image.fromURL(`img/${e.target.value}`, ico => {
+      ico.set({ objectCaching: false });
       ico.scaleToWidth(40);
       ico.left = 100; ico.top = 10;
       canvas.add(ico).setActiveObject(ico);
     });
   });
 
-  // ===== Resize
+  // ===== Resize =====
   let lastW = 0;
   const ro = new ResizeObserver(() => {
     const w = container.clientWidth;
@@ -302,7 +286,7 @@ window.addEventListener('load', () => {
     setTimeout(() => { lastW = 0; resizeCanvas(); }, 200);
   });
 
-  // ===== Init
+  // ===== Init =====
   resizeCanvas();
   const initial = document.querySelector('input[name="holeOption"]:checked');
   if (initial) {
