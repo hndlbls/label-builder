@@ -1,3 +1,61 @@
+/* ========= @font-face (14 font) ========= */
+@font-face {
+  font-family: 'Font1';
+  src: url('../fonts/Font1.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Font2';
+  src: url('../fonts/Font2.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Font3';
+  src: url('../fonts/Font3.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Font4';
+  src: url('../fonts/Font4.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Font5';
+  src: url('../fonts/Font5.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Font6';
+  src: url('../fonts/Font6.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Font7';
+  src: url('../fonts/Font7.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Font8';
+  src: url('../fonts/Font8.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Font9';
+  src: url('../fonts/Font9.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Font10';
+  src: url('../fonts/Font10.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Font11';
+  src: url('../fonts/Font11.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Font12';
+  src: url('../fonts/Font12.otf') format('opentype');
+}
+@font-face {
+  font-family: 'Font13';
+  src: url('../fonts/Font13.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Font14';
+  src: url('../fonts/Font14.ttf') format('truetype');
+}
+
 /* ========= RESET E BASE PER NO OVERFLOW ========= */
 html, body {
   margin: 0;
@@ -12,7 +70,7 @@ html, body {
 
 /* ========= STILI GLOBALI ========= */
 body {
-  font-family: sans-serif;
+  font-family: 'Font10', sans-serif;
   background: #ffffff;
 }
 
@@ -47,6 +105,7 @@ body {
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  font-family: inherit;
 }
 
 /* ===== Hole Options ===== */
@@ -63,6 +122,7 @@ body {
   align-items: center;
   cursor: pointer;
   font-size: 0.9rem;
+  font-family: inherit;
 }
 .hole-option input {
   display: none;
@@ -102,6 +162,7 @@ body {
 /* ========= DRAG & DROP CONTROLS ========= */
 #fontSelect, #iconSelect {
   margin-bottom: 0;
+  font-family: inherit;
 }
 
 /* ========= MEDIA QUERY PER MOBILE ========= */
@@ -118,27 +179,17 @@ body {
   }
 }
 
-.warning {
-  max-width: 1000px;
-  margin: 10px auto;
-  padding: 12px;
-  background: #ffdddd;
-  border: 1px solid #ff5c5c;
-  color: #800;
-  font-size: 0.9rem;
-  text-align: center;
-  border-radius: 4px;
-}
-
-/* area riservata al warning per evitare layout shift */
+/* ========= WARNING ========= */
 .validation-area {
   min-height: 44px;               /* riserva spazio fisso */
   display: flex;
   align-items: center;
   justify-content: center;
   margin-top: 8px;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
 }
-
 .warning {
   background: #ffdddd;
   border: 1px solid #ff5c5c;
@@ -146,16 +197,14 @@ body {
   padding: 8px 12px;
   border-radius: 4px;
   font-size: 0.95rem;
+  font-family: inherit;
+  text-align: center;
   /* niente reflow: usiamo visibility/opacity */
   visibility: hidden;
   opacity: 0;
   transition: opacity .15s ease;
 }
-
 .warning.show {
   visibility: visible;
   opacity: 1;
 }
-
-/* opzionale: evita overflow orizzontale */
-html, body { overflow-x: hidden; }
